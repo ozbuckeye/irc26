@@ -55,6 +55,7 @@ export const editPledgeSchema = updatePledgeSchema;
 // Update submission schema
 export const updateSubmissionSchema = submissionSchema.partial().extend({
   pledgeId: z.string().optional(),
+  images: z.array(imageSchema).max(3, 'Maximum 3 images allowed').optional(),
 });
 
 // GC username update schema

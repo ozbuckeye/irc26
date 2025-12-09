@@ -21,6 +21,7 @@ export default function PledgePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [gcUsername, setGcUsername] = useState('');
   const [formData, setFormData] = useState({
     title: '',
@@ -89,6 +90,7 @@ export default function PledgePage() {
   };
 
   const handleImageUpload = (res: any) => {
+    setUploadingImage(false); // Image has appeared
     if (res && Array.isArray(res)) {
       const newImages = res.map((file: any) => ({
         url: file.url,
@@ -329,13 +331,24 @@ export default function PledgePage() {
             </div>
           )}
           {formData.images.length < 3 && (
-            <UploadButton
-              endpoint="pledgeImages"
-              onClientUploadComplete={handleImageUpload}
-              onUploadError={(error: Error) => {
-                setError(`Upload failed: ${error.message}`);
-              }}
-            />
+            <div>
+              <UploadButton
+                endpoint="pledgeImages"
+                onUploadBegin={() => {
+                  setUploadingImage(true);
+                }}
+                onClientUploadComplete={handleImageUpload}
+                onUploadError={(error: Error) => {
+                  setUploadingImage(false);
+                  setError(`Upload failed: ${error.message}`);
+                }}
+              />
+              {uploadingImage && (
+                <p className="text-sm text-blue-600 mt-2 italic">
+                  ⏳ Please wait until the image appears on the page before submitting...
+                </p>
+              )}
+            </div>
           )}
         </div>
 

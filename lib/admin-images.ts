@@ -17,11 +17,10 @@ export async function getAllAdminImages(): Promise<AdminImageItem[]> {
   const images: AdminImageItem[] = [];
 
   // Fetch pledges with non-empty images
-  const pledges = await prisma.pledge.findMany({
+  // Exclude pledges that have submissions (images moved to submission)
+  const allPledges = await prisma.pledge.findMany({
     where: {
-      images: {
-        not: null,
-      },
+      submission: null, // Only include pledges without submissions
     },
     select: {
       id: true,
@@ -30,6 +29,15 @@ export async function getAllAdminImages(): Promise<AdminImageItem[]> {
       images: true,
       createdAt: true,
     },
+  });
+
+  // Filter to only pledges with non-null, non-empty images
+  const pledges = allPledges.filter((pledge) => {
+    if (!pledge.images) return false;
+    // Check if images is an array with at least one item, or an object with urls array
+    if (Array.isArray(pledge.images) && pledge.images.length > 0) return true;
+    if (typeof pledge.images === 'object' && 'urls' in pledge.images && Array.isArray((pledge.images as any).urls) && (pledge.images as any).urls.length > 0) return true;
+    return false;
   });
 
   // Process pledge images

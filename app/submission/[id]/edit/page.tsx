@@ -5,6 +5,14 @@ import { useRouter, useParams } from 'next/navigation';
 import { CACHE_TYPES, AU_STATES, DIFFICULTY_RATINGS, TERRAIN_RATINGS } from '@/config/irc26';
 import RequireAuth from '@/components/RequireAuth';
 import Card from '@/components/Card';
+import { UploadButton } from '@/app/api/uploadthing/components';
+
+type ImageData = {
+  url: string;
+  key: string;
+  width?: number;
+  height?: number;
+};
 
 export default function EditSubmissionPage() {
   const router = useRouter();
@@ -13,6 +21,7 @@ export default function EditSubmissionPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState({
     gcCode: '',
     cacheName: '',
@@ -23,6 +32,7 @@ export default function EditSubmissionPage() {
     type: '' as '' | 'TRADITIONAL' | 'MULTI' | 'MYSTERY' | 'LETTERBOX' | 'WHERIGO' | 'VIRTUAL',
     hiddenDate: '',
     notes: '',
+    images: [] as ImageData[],
   });
 
   useEffect(() => {
@@ -32,6 +42,22 @@ export default function EditSubmissionPage() {
         if (data.submission) {
           const submission = data.submission;
           const hiddenDate = new Date(submission.hiddenDate);
+          
+          // Parse images - handle JSON string or array
+          let images: ImageData[] = [];
+          if (submission.images) {
+            if (Array.isArray(submission.images)) {
+              images = submission.images;
+            } else if (typeof submission.images === 'string') {
+              try {
+                const parsed = JSON.parse(submission.images);
+                images = Array.isArray(parsed) ? parsed : [];
+              } catch {
+                images = [];
+              }
+            }
+          }
+          
           setFormData({
             gcCode: submission.gcCode,
             cacheName: submission.cacheName,
@@ -42,6 +68,7 @@ export default function EditSubmissionPage() {
             type: submission.type,
             hiddenDate: hiddenDate.toISOString().split('T')[0],
             notes: submission.notes || '',
+            images: images,
           });
         }
         setLoading(false);
@@ -78,6 +105,26 @@ export default function EditSubmissionPage() {
       setError(err.message);
       setSaving(false);
     }
+  };
+
+  const handleImageUpload = (res: any) => {
+    setUploadingImage(false); // Image has appeared
+    if (res && Array.isArray(res)) {
+      const newImages = res.map((file: any) => ({
+        url: file.url,
+        key: file.key,
+        width: file.width,
+        height: file.height,
+      }));
+      setFormData({ ...formData, images: [...formData.images, ...newImages].slice(0, 3) });
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData({
+      ...formData,
+      images: formData.images.filter((_, i) => i !== index),
+    });
   };
 
   const cacheTypeLabels: Record<string, string> = {
@@ -283,6 +330,59 @@ export default function EditSubmissionPage() {
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-2">
+                    Photos (Maximum 3)
+                  </label>
+                  {formData.images.length > 0 && (
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      {formData.images.map((image, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={image.url}
+                            alt={`Photo ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg border border-gray-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            aria-label="Remove image"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {formData.images.length < 3 && (
+                    <div>
+                      <UploadButton
+                        endpoint="submissionImages"
+                        onUploadBegin={() => {
+                          setUploadingImage(true);
+                        }}
+                        onClientUploadComplete={handleImageUpload}
+                        onUploadError={(error: Error) => {
+                          setUploadingImage(false);
+                          setError(`Upload failed: ${error.message}`);
+                        }}
+                        className="ut-button:bg-secondary-600 ut-button:ut-readying:bg-secondary-400 ut-button:ut-uploading:bg-secondary-500"
+                      />
+                      {uploadingImage && (
+                        <p className="text-sm text-blue-600 mt-2 italic">
+                          ⏳ Please wait until the image appears on the page before submitting...
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {formData.images.length >= 3 && (
+                    <p className="text-sm text-gray-600 mt-2">Maximum 3 photos reached. Remove a photo to add another.</p>
+                  )}
                 </div>
 
                 <div className="pt-4 flex gap-4">

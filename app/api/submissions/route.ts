@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       ? new Date(validated.hiddenDate) 
       : validated.hiddenDate;
 
-    // Copy images from pledge if they exist
+    // Move images from pledge to submission (transfer, not copy)
     let submissionImages = null;
     if (pledge.images) {
       // Handle various image formats (same logic as used elsewhere)
@@ -55,29 +55,37 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create submission
-    const submission = await prisma.submission.create({
-      data: {
-        pledgeId: validated.pledgeId,
-        userId: session.user.id,
-        gcUsername: pledge.gcUsername,
-        gcCode: validated.gcCode,
-        cacheName: validated.cacheName,
-        suburb: validated.suburb,
-        state: validated.state,
-        difficulty: validated.difficulty,
-        terrain: validated.terrain,
-        type: validated.type,
-        hiddenDate: hiddenDate,
-        notes: validated.notes,
-        images: submissionImages,
-      },
-    });
+    // Create submission and update pledge in a transaction
+    const submission = await prisma.$transaction(async (tx) => {
+      // Create submission with images from pledge
+      const newSubmission = await tx.submission.create({
+        data: {
+          pledgeId: validated.pledgeId,
+          userId: session.user.id,
+          gcUsername: pledge.gcUsername,
+          gcCode: validated.gcCode,
+          cacheName: validated.cacheName,
+          suburb: validated.suburb,
+          state: validated.state,
+          difficulty: validated.difficulty,
+          terrain: validated.terrain,
+          type: validated.type,
+          hiddenDate: hiddenDate,
+          notes: validated.notes,
+          images: submissionImages,
+        },
+      });
 
-    // Update pledge status to HIDDEN
-    await prisma.pledge.update({
-      where: { id: validated.pledgeId },
-      data: { status: 'HIDDEN' },
+      // Update pledge: set status to HIDDEN and clear images (images moved to submission)
+      await tx.pledge.update({
+        where: { id: validated.pledgeId },
+        data: { 
+          status: 'HIDDEN',
+          images: null, // Clear images from pledge since they're now in submission
+        },
+      });
+
+      return newSubmission;
     });
 
     // Send confirmation email

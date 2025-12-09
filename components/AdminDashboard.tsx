@@ -94,6 +94,7 @@ export default function AdminDashboard({ initialImages }: AdminDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<Pledge | Submission | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; type: 'pledge' | 'submission'; name: string } | null>(null);
   
   // Filters
   const [filters, setFilters] = useState({
@@ -163,9 +164,14 @@ export default function AdminDashboard({ initialImages }: AdminDashboardProps) {
     }
   };
 
-  const handleDelete = async (id: string, type: 'pledge' | 'submission') => {
-    if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
+  const handleDeleteClick = (id: string, type: 'pledge' | 'submission', name: string) => {
+    setDeleteConfirm({ id, type, name });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm) return;
     
+    const { id, type } = deleteConfirm;
     try {
       const endpoint = type === 'pledge' ? 'pledges' : 'submissions';
       const res = await fetch(`/api/${endpoint}/${id}`, { method: 'DELETE' });
@@ -173,13 +179,19 @@ export default function AdminDashboard({ initialImages }: AdminDashboardProps) {
         fetchData();
         setIsModalOpen(false);
         setSelectedItem(null);
+        setDeleteConfirm(null);
       } else {
-        alert('Failed to delete');
+        const data = await res.json();
+        alert(`Failed to delete: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error deleting:', error);
       alert('Failed to delete');
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm(null);
   };
 
   return (
@@ -298,7 +310,15 @@ export default function AdminDashboard({ initialImages }: AdminDashboardProps) {
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{pledge.status}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{new Date(pledge.createdAt).toLocaleDateString()}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/pledge/${pledge.id}/edit`} className="text-primary-600 hover:text-primary-800">Edit</Link>
+                          <div className="flex gap-3">
+                            <Link href={`/pledge/${pledge.id}/edit`} className="text-primary-600 hover:text-primary-800">Edit</Link>
+                            <button
+                              onClick={() => handleDeleteClick(pledge.id, 'pledge', pledge.title || `Pledge by ${pledge.gcUsername}`)}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -347,7 +367,15 @@ export default function AdminDashboard({ initialImages }: AdminDashboardProps) {
                         <td className="px-6 py-4 text-sm">{submission.suburb}, {submission.state}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{new Date(submission.createdAt).toLocaleDateString()}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/submission/${submission.id}/edit`} className="text-primary-600 hover:text-primary-800">Edit</Link>
+                          <div className="flex gap-3">
+                            <Link href={`/submission/${submission.id}/edit`} className="text-primary-600 hover:text-primary-800">Edit</Link>
+                            <button
+                              onClick={() => handleDeleteClick(submission.id, 'submission', `${submission.gcCode} - ${submission.cacheName}`)}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -424,9 +452,11 @@ export default function AdminDashboard({ initialImages }: AdminDashboardProps) {
                 <button
                   onClick={() => {
                     if (activeTab === 'pledges') {
-                      handleDelete((selectedItem as Pledge).id, 'pledge');
+                      const pledge = selectedItem as Pledge;
+                      handleDeleteClick(pledge.id, 'pledge', pledge.title || `Pledge by ${pledge.gcUsername}`);
                     } else {
-                      handleDelete((selectedItem as Submission).id, 'submission');
+                      const submission = selectedItem as Submission;
+                      handleDeleteClick(submission.id, 'submission', `${submission.gcCode} - ${submission.cacheName}`);
                     }
                   }}
                   className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
@@ -447,6 +477,42 @@ export default function AdminDashboard({ initialImages }: AdminDashboardProps) {
 
       {/* Image Gallery Section */}
       <ImageGallery images={initialImages} />
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900">Confirm Deletion</h3>
+            </div>
+            <div className="px-6 py-4">
+              <p className="text-gray-700 mb-2">
+                Are you sure you want to delete this {deleteConfirm.type}?
+              </p>
+              <p className="text-sm font-semibold text-gray-900 bg-gray-100 p-3 rounded">
+                {deleteConfirm.name}
+              </p>
+              <p className="text-sm text-red-600 mt-4">
+                ⚠️ This action cannot be undone.
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={handleDeleteCancel}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
