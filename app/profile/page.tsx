@@ -5,6 +5,8 @@ import Card from '@/components/Card';
 import { formatDate } from '@/lib/date-utils';
 import ProfileStats from '@/components/ProfileStats';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProfilePage() {
   const session = await getSession();
 
