@@ -24,10 +24,10 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
           },
         });
         return verificationToken;
-      } catch (error: any) {
-        // P2025 is Prisma's error code for "Record to delete does not exist"
+      } catch (error: unknown) {
+        // P2025 is Prisma&apos;s error code for "Record to delete does not exist"
         // This happens when a magic link is reused or already consumed
-        if (error?.code === 'P2025') {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
           // Token already consumed or doesn't exist - return null gracefully
           return null;
         }

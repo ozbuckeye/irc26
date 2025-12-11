@@ -35,18 +35,11 @@ const createHandler = () => {
     });
   }
   
-  // Fall back to legacy secret-based authentication
+  // Fall back to legacy secret-based authentication  
   if (hasSecret) {
     console.log('✅ Using UploadThing legacy secret-based authentication');
-    const config: { secret: string; appId?: string } = {
-      secret: process.env.UPLOADTHING_SECRET!,
-    };
-    if (hasAppId) {
-      config.appId = process.env.UPLOADTHING_APP_ID!;
-    }
     return createRouteHandler({
       router: ourFileRouter,
-      config,
     });
   }
 
@@ -62,11 +55,12 @@ let handlers: { GET: typeof GET; POST: typeof POST } | null = null;
 
 try {
   handlers = createHandler();
-} catch (error: any) {
-  console.error('❌ Failed to create UploadThing handler:', error.message);
+} catch (error: unknown) {
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  console.error('❌ Failed to create UploadThing handler:', message);
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<Response> {
   if (!handlers) {
     const errorMsg = hasToken || hasSecret
       ? 'Handler initialization failed'
@@ -84,19 +78,20 @@ export async function GET(request: NextRequest) {
 
   try {
     return await handlers.GET(request);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('UploadThing GET error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json(
       { 
         error: 'UploadThing server error',
-        message: error.message || 'Unknown error occurred'
+        message
       },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<Response> {
   if (!handlers) {
     const errorMsg = hasToken || hasSecret
       ? 'Handler initialization failed'
@@ -114,17 +109,20 @@ export async function POST(request: NextRequest) {
 
   try {
     return await handlers.POST(request);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('UploadThing POST error:', error);
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
-    });
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
+    }
+    const message = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json(
       { 
         error: 'UploadThing server error',
-        message: error.message || 'Unknown error occurred'
+        message
       },
       { status: 500 }
     );

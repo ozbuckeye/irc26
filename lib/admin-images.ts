@@ -36,7 +36,10 @@ export async function getAllAdminImages(): Promise<AdminImageItem[]> {
     if (!pledge.images) return false;
     // Check if images is an array with at least one item, or an object with urls array
     if (Array.isArray(pledge.images) && pledge.images.length > 0) return true;
-    if (typeof pledge.images === 'object' && 'urls' in pledge.images && Array.isArray((pledge.images as any).urls) && (pledge.images as any).urls.length > 0) return true;
+    if (typeof pledge.images === 'object' && pledge.images !== null && 'urls' in pledge.images) {
+      const imageObj = pledge.images as Record<string, unknown>;
+      if (Array.isArray(imageObj.urls) && imageObj.urls.length > 0) return true;
+    }
     return false;
   });
 
@@ -48,18 +51,18 @@ export async function getAllAdminImages(): Promise<AdminImageItem[]> {
     
     // Parse images - handle various formats
     if (Array.isArray(pledge.images)) {
-      imageUrls = pledge.images.map((img: any) => {
+      imageUrls = pledge.images.map((img: unknown) => {
         if (typeof img === 'string') return img;
-        if (img && typeof img === 'object' && 'url' in img) return img.url;
+        if (img && typeof img === 'object' && 'url' in img) return (img as { url: string }).url;
         return null;
       }).filter((url): url is string => url !== null);
-    } else if (typeof pledge.images === 'object' && 'urls' in pledge.images) {
-      imageUrls = (pledge.images as any).urls || [];
+    } else if (typeof pledge.images === 'object' && pledge.images !== null && 'urls' in pledge.images) {
+      imageUrls = ((pledge.images as Record<string, unknown>).urls as string[]) || [];
     } else if (typeof pledge.images === 'string') {
       try {
         const parsed = JSON.parse(pledge.images);
         if (Array.isArray(parsed)) {
-          imageUrls = parsed.map((img: any) => {
+          imageUrls = parsed.map((img: unknown) => {
             if (typeof img === 'string') return img;
             if (img && typeof img === 'object' && 'url' in img) return img.url;
             return null;
@@ -103,7 +106,10 @@ export async function getAllAdminImages(): Promise<AdminImageItem[]> {
     if (!sub.images) return false;
     // Check if images is an array with at least one item, or an object with urls array
     if (Array.isArray(sub.images) && sub.images.length > 0) return true;
-    if (typeof sub.images === 'object' && 'urls' in sub.images && Array.isArray((sub.images as any).urls) && (sub.images as any).urls.length > 0) return true;
+    if (typeof sub.images === 'object' && sub.images !== null && 'urls' in sub.images) {
+      const imageObj = sub.images as Record<string, unknown>;
+      if (Array.isArray(imageObj.urls) && imageObj.urls.length > 0) return true;
+    }
     return false;
   });
 
@@ -115,20 +121,20 @@ export async function getAllAdminImages(): Promise<AdminImageItem[]> {
     
     // Parse images - handle various formats (same logic as pledges)
     if (Array.isArray(submission.images)) {
-      imageUrls = submission.images.map((img: any) => {
+      imageUrls = submission.images.map((img: unknown) => {
         if (typeof img === 'string') return img;
-        if (img && typeof img === 'object' && 'url' in img) return img.url;
+        if (img && typeof img === 'object' && 'url' in img) return (img as { url: string }).url;
         return null;
       }).filter((url): url is string => url !== null);
-    } else if (typeof submission.images === 'object' && 'urls' in submission.images) {
-      imageUrls = (submission.images as any).urls || [];
+    } else if (typeof submission.images === 'object' && submission.images !== null && 'urls' in submission.images) {
+      imageUrls = ((submission.images as Record<string, unknown>).urls as string[]) || [];
     } else if (typeof submission.images === 'string') {
       try {
         const parsed = JSON.parse(submission.images);
         if (Array.isArray(parsed)) {
-          imageUrls = parsed.map((img: any) => {
+          imageUrls = parsed.map((img: unknown) => {
             if (typeof img === 'string') return img;
-            if (img && typeof img === 'object' && 'url' in img) return img.url;
+            if (img && typeof img === 'object' && 'url' in img) return (img as { url: string }).url;
             return null;
           }).filter((url): url is string => url !== null);
         } else if (parsed.urls) {

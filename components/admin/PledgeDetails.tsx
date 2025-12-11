@@ -8,7 +8,7 @@ type AdminPledge = {
   approxSuburb: string;
   approxState: string;
   conceptNotes: string | null;
-  images: any; // Prisma Json type - can be array of objects, array of strings, or null
+  images: unknown; // Prisma Json type - can be array of objects, array of strings, or null
   status: string;
   createdAt: string;
   user: {
@@ -83,18 +83,18 @@ export function PledgeDetails({ pledge }: PledgeDetailsProps) {
   if (pledge.images) {
     if (Array.isArray(pledge.images)) {
       // Handle array of objects with url property, or array of strings
-      imageUrls = pledge.images.map((img: any) => {
+      imageUrls = pledge.images.map((img: unknown) => {
         if (typeof img === 'string') return img;
-        if (img && typeof img === 'object' && 'url' in img) return img.url;
+        if (img && typeof img === 'object' && 'url' in img) return (img as { url: string }).url;
         return null;
       }).filter((url): url is string => url !== null);
-    } else if (typeof pledge.images === 'object' && 'urls' in pledge.images) {
-      imageUrls = (pledge.images as any).urls || [];
+    } else if (typeof pledge.images === 'object' && pledge.images !== null && 'urls' in pledge.images) {
+      imageUrls = ((pledge.images as Record<string, unknown>).urls as string[]) || [];
     } else if (typeof pledge.images === 'string') {
       try {
         const parsed = JSON.parse(pledge.images);
         if (Array.isArray(parsed)) {
-          imageUrls = parsed.map((img: any) => {
+          imageUrls = parsed.map((img: unknown) => {
             if (typeof img === 'string') return img;
             if (img && typeof img === 'object' && 'url' in img) return img.url;
             return null;

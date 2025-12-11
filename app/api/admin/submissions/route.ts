@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminSession } from '@/lib/admin-session';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,14 +19,14 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    const where: any = {};
+    const where: Prisma.SubmissionWhereInput = {};
 
     if (state) {
-      where.state = state;
+      where.state = state as 'ACT' | 'NSW' | 'NT' | 'QLD' | 'SA' | 'TAS' | 'VIC' | 'WA';
     }
 
     if (cacheType) {
-      where.type = cacheType;
+      where.type = cacheType as 'TRADITIONAL' | 'MULTI' | 'MYSTERY' | 'LETTERBOX' | 'WHERIGO' | 'VIRTUAL';
     }
 
     if (gcUsername) {
@@ -68,9 +69,10 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ submissions });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching admin submissions:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch submissions' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to fetch submissions';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

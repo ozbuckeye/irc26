@@ -6,8 +6,6 @@ import Link from 'next/link';
 import { RAIN_START_DATE, SUBMISSION_DEADLINE } from '@/config/irc26';
 import { formatDate } from '@/lib/date-utils';
 import Card from '@/components/Card';
-import CTAButton from '@/components/CTAButton';
-import CountdownTimer from '@/components/CountdownTimer';
 
 interface Stats {
   totalPledged: number;
@@ -112,7 +110,7 @@ export default function Home() {
                 className="object-contain"
               />
             </div>
-            <h2 className="text-center font-lovely text-2xl sm:text-3xl mt-6 mb-8">It's Raining Caches 2026</h2>
+            <h2 className="text-center font-lovely text-2xl sm:text-3xl mt-6 mb-8">It&apos;s Raining Caches 2026</h2>
             <h3 className="text-center font-lovely text-2xl sm:text-3xl leading-tight mb-2">
               {formatDate(RAIN_START_DATE, 'DDth MMMM YYYY')}
             </h3>

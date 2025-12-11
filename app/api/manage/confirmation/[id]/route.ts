@@ -27,11 +27,10 @@ export async function PUT(
       );
     }
 
-    const body = await request.json();
-    // const validated = editConfirmationSchema.parse(body);
+    await request.json();
 
     // Verify the confirmation belongs to the user
-    const confirmation = await prisma.confirmation.findUnique({
+    const confirmation = await prisma.submission.findUnique({
       where: { id: params.id },
     });
 
@@ -42,28 +41,11 @@ export async function PUT(
       );
     }
 
-    // Update confirmation
-    const updated = await prisma.confirmation.update({
-      where: { id: params.id },
-      data: {
-        gcCode: validated.gcCode,
-        cacheName: validated.cacheName,
-        type: validated.type,
-        size: validated.size,
-        difficulty: validated.difficulty,
-        terrain: validated.terrain,
-        suburb: validated.suburb,
-        state: validated.state,
-        notes: validated.notes || null,
-      },
-    });
-
     return NextResponse.json({
-      success: true,
-      confirmation: updated,
-    });
-  } catch (error: any) {
-    if (error.name === 'ZodError') {
+      error: 'This endpoint is not fully implemented. Please use the account page to manage submissions.',
+    }, { status: 501 });
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError' && 'errors' in error) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
         { status: 400 }
@@ -103,7 +85,7 @@ export async function DELETE(
     }
 
     // Verify the confirmation belongs to the user
-    const confirmation = await prisma.confirmation.findUnique({
+    const confirmation = await prisma.submission.findUnique({
       where: { id: params.id },
     });
 
@@ -114,7 +96,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.confirmation.delete({
+    await prisma.submission.delete({
       where: { id: params.id },
     });
 
@@ -130,8 +112,3 @@ export async function DELETE(
     );
   }
 }
-
-
-
-
-

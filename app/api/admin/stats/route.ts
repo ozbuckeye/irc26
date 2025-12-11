@@ -16,43 +16,38 @@ export async function GET() {
     // Total pledges
     const totalPledges = await prisma.pledge.count();
 
-    // Total caches pledged (sum)
-    const totalCachesPledged = await prisma.pledge.aggregate({
-      _sum: {
-        pledgedCount: true,
-      },
-    });
+    // Total caches pledged (just count pledges since there's no pledgedCount field)
+    const totalCachesPledged = totalPledges;
 
     // Total confirmations
-    const totalConfirmations = await prisma.confirmation.count();
+    const totalConfirmations = await prisma.submission.count();
 
     // Total pledgers
     const totalPledgers = await prisma.user.count({
       where: {
         OR: [
           { pledges: { some: {} } },
-          { confirmations: { some: {} } },
+          { submissions: { some: {} } },
         ],
       },
     });
 
     // States breakdown
     const pledgeStates = await prisma.pledge.findMany({
-      select: { states: true },
+      select: { approxState: true },
     });
-    const confirmationStates = await prisma.confirmation.findMany({
+    const confirmationStates = await prisma.submission.findMany({
       select: { state: true },
     });
 
     const stateBreakdown: Record<string, { pledges: number; confirmations: number }> = {};
     
     pledgeStates.forEach((p) => {
-      p.states.forEach((state) => {
-        if (!stateBreakdown[state]) {
-          stateBreakdown[state] = { pledges: 0, confirmations: 0 };
-        }
-        stateBreakdown[state].pledges += 1;
-      });
+      const state = p.approxState;
+      if (!stateBreakdown[state]) {
+        stateBreakdown[state] = { pledges: 0, confirmations: 0 };
+      }
+      stateBreakdown[state].pledges += 1;
     });
 
     confirmationStates.forEach((c) => {
@@ -64,26 +59,20 @@ export async function GET() {
 
     // Cache type breakdown
     const typeBreakdown: Record<string, { pledged: number; confirmed: number }> = {};
-    
-    pledgeStates.forEach((p) => {
-      // We need to get cache types from pledges
-      // This is a simplified version - you might want to aggregate differently
-    });
 
     const allPledges = await prisma.pledge.findMany({
-      select: { cacheTypes: true },
+      select: { cacheType: true },
     });
 
     allPledges.forEach((p) => {
-      p.cacheTypes.forEach((type) => {
-        if (!typeBreakdown[type]) {
-          typeBreakdown[type] = { pledged: 0, confirmed: 0 };
-        }
-        typeBreakdown[type].pledged += 1;
-      });
+      const type = p.cacheType;
+      if (!typeBreakdown[type]) {
+        typeBreakdown[type] = { pledged: 0, confirmed: 0 };
+      }
+      typeBreakdown[type].pledged += 1;
     });
 
-    const allConfirmations = await prisma.confirmation.findMany({
+    const allConfirmations = await prisma.submission.findMany({
       select: { type: true },
     });
 
@@ -98,40 +87,30 @@ export async function GET() {
     const sizeBreakdown: Record<string, { pledged: number; confirmed: number }> = {};
     
     const allPledgesWithSizes = await prisma.pledge.findMany({
-      select: { cacheSizes: true },
+      select: { cacheSize: true },
     });
 
     allPledgesWithSizes.forEach((p) => {
-      p.cacheSizes.forEach((size) => {
-        if (!sizeBreakdown[size]) {
-          sizeBreakdown[size] = { pledged: 0, confirmed: 0 };
-        }
-        sizeBreakdown[size].pledged += 1;
-      });
-    });
-
-    const allConfirmationsWithSizes = await prisma.confirmation.findMany({
-      select: { size: true },
-    });
-
-    allConfirmationsWithSizes.forEach((c) => {
-      if (!sizeBreakdown[c.size]) {
-        sizeBreakdown[c.size] = { pledged: 0, confirmed: 0 };
+      const size = p.cacheSize;
+      if (!sizeBreakdown[size]) {
+        sizeBreakdown[size] = { pledged: 0, confirmed: 0 };
       }
-      sizeBreakdown[c.size].confirmed += 1;
+      sizeBreakdown[size].pledged += 1;
     });
+
+    // Note: Submissions don't track cache size, so size breakdown for confirmations is not available
 
     return NextResponse.json({
       totalPledges,
-      totalCachesPledged: totalCachesPledged._sum.pledgedCount || 0,
+      totalCachesPledged,
       totalConfirmations,
       totalPledgers,
       stateBreakdown,
       typeBreakdown,
       sizeBreakdown,
     });
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

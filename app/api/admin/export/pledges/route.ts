@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminSession } from '@/lib/admin-session';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,10 +17,10 @@ export async function GET(request: NextRequest) {
     const gcUsername = searchParams.get('gcUsername');
     const search = searchParams.get('search');
 
-    const where: any = {};
+    const where: Prisma.PledgeWhereInput = {};
 
-    if (state) where.approxState = state;
-    if (cacheType) where.cacheType = cacheType;
+    if (state) where.approxState = state as 'ACT' | 'NSW' | 'NT' | 'QLD' | 'SA' | 'TAS' | 'VIC' | 'WA';
+    if (cacheType) where.cacheType = cacheType as 'TRADITIONAL' | 'MULTI' | 'MYSTERY' | 'LETTERBOX' | 'WHERIGO' | 'VIRTUAL';
     if (gcUsername) where.gcUsername = { contains: gcUsername, mode: 'insensitive' };
     if (search) {
       where.OR = [
@@ -68,9 +69,10 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="irc26-pledges-${new Date().toISOString().split('T')[0]}.csv"`,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error exporting pledges:', error);
-    return NextResponse.json({ error: error.message || 'Failed to export pledges' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to export pledges';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

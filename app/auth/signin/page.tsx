@@ -31,7 +31,7 @@ export default function SignInPage() {
         // Redirect to verify request page
         window.location.href = '/auth/verify-request';
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
       setLoading(false);
     }

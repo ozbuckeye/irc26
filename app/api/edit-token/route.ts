@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Magic link sent to your email',
     });
-  } catch (error: any) {
-    if (error.name === 'ZodError') {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError' && 'errors' in error) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
         { status: 400 }

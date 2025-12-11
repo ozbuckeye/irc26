@@ -3,8 +3,8 @@ import { createUploadthing, type FileRouter } from 'uploadthing/next';
 const f = createUploadthing();
 
 export const ourFileRouter = {
-  pledgeImages: f({ image: { maxFileSize: '3MB', maxFileCount: 3 } })
-    .onUploadComplete(async ({ metadata, file }) => {
+  pledgeImages: f({ image: { maxFileSize: '4MB', maxFileCount: 3 } })
+    .onUploadComplete(async ({ file }) => {
       try {
         // Return the file data that will be sent to the client
         return { 
@@ -19,8 +19,8 @@ export const ourFileRouter = {
         return { url: file.url, key: file.key };
       }
     }),
-  submissionImages: f({ image: { maxFileSize: '3MB', maxFileCount: 3 } })
-    .onUploadComplete(async ({ metadata, file }) => {
+  submissionImages: f({ image: { maxFileSize: '4MB', maxFileCount: 3 } })
+    .onUploadComplete(async ({ file }) => {
       try {
         // Return the file data that will be sent to the client
         return { 

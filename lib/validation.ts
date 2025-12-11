@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CACHE_TYPES, CACHE_SIZES, AU_STATES, DIFFICULTY_RATINGS, TERRAIN_RATINGS } from '@/config/irc26';
+import { DIFFICULTY_RATINGS, TERRAIN_RATINGS } from '@/config/irc26';
 
 // Image object schema for pledge images
 const imageSchema = z.object({
@@ -28,10 +28,10 @@ export const submissionSchema = z.object({
   cacheName: z.string().min(1, 'Cache name is required').max(200),
   suburb: z.string().min(1, 'Suburb is required').max(200),
   state: z.enum(['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA']),
-  difficulty: z.number().min(1.0).max(5.0).refine((val) => DIFFICULTY_RATINGS.includes(val as any), {
+  difficulty: z.number().min(1.0).max(5.0).refine((val) => (DIFFICULTY_RATINGS as unknown as number[]).includes(val), {
     message: 'Difficulty must be in 0.5 increments from 1.0 to 5.0',
   }),
-  terrain: z.number().min(1.0).max(5.0).refine((val) => TERRAIN_RATINGS.includes(val as any), {
+  terrain: z.number().min(1.0).max(5.0).refine((val) => (TERRAIN_RATINGS as unknown as number[]).includes(val), {
     message: 'Terrain must be in 0.5 increments from 1.0 to 5.0',
   }),
   type: z.enum(['TRADITIONAL', 'MULTI', 'MYSTERY', 'LETTERBOX', 'WHERIGO', 'VIRTUAL']),

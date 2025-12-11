@@ -35,7 +35,7 @@ export default async function ProfilePage() {
           <Card className="max-w-2xl mx-auto p-8 bg-white/95 rounded-3xl shadow-lg">
             <h1 className="text-3xl font-lovely text-center mb-4">Profile</h1>
             <p className="text-center text-sm">
-              We couldn't find your profile record. Please try signing out and back in.
+              We couldn&apos;t find your profile record. Please try signing out and back in.
             </p>
           </Card>
         </div>
@@ -127,7 +127,7 @@ export default async function ProfilePage() {
               <h2 className="font-lovely text-2xl text-center sm:text-left">Your Pledges</h2>
               {user.pledges.length === 0 ? (
                 <p className="text-sm sm:text-base text-black/70 font-arial-rounded">
-                  You haven't pledged any caches yet. Head to the PLEDGE page to make it Rain Down
+                  You haven&apos;t pledged any caches yet. Head to the PLEDGE page to make it Rain Down
                   Love.
                 </p>
               ) : (
@@ -169,7 +169,7 @@ export default async function ProfilePage() {
               <h2 className="font-lovely text-2xl text-center sm:text-left">Your Submissions</h2>
               {user.submissions.length === 0 ? (
                 <p className="text-sm sm:text-base text-black/70 font-arial-rounded">
-                  Once you've turned your pledges into real GC codes, they'll appear here.
+                  Once you&apos;ve turned your pledges into real GC codes, they&apos;ll appear here.
                 </p>
               ) : (
                 <div className="space-y-3 max-h-80 overflow-y-auto pr-1">

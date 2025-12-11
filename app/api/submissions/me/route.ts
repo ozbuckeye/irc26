@@ -15,9 +15,10 @@ export async function GET() {
     });
 
     return NextResponse.json({ submissions });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching submissions:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch submissions' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to fetch submissions';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

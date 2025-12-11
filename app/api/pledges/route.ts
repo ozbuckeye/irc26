@@ -40,12 +40,13 @@ export async function POST(request: NextRequest) {
     await sendPledgeConfirmationEmail(user.email, pledge.id);
 
     return NextResponse.json({ success: true, pledge }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating pledge:', error);
-    if (error.name === 'ZodError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError' && 'errors' in error) {
       return NextResponse.json({ error: 'Validation error', details: error.errors }, { status: 400 });
     }
-    return NextResponse.json({ error: error.message || 'Failed to create pledge' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to create pledge';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

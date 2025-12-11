@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Card from '@/components/Card';
 
 export default function AdminSignInPage() {
-  const router = useRouter();
+  useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/admin';
   const [password, setPassword] = useState('');

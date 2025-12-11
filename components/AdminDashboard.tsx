@@ -18,7 +18,7 @@ type Pledge = {
   approxSuburb: string;
   approxState: string;
   conceptNotes: string | null;
-  images: any;
+  images: unknown;
   status: string;
   createdAt: string;
   user: {
@@ -77,8 +77,8 @@ type AuditLog = {
   action: string;
   targetId: string;
   targetKind: string;
-  before: any;
-  after: any;
+  before: unknown;
+  after: unknown;
   createdAt: string;
 };
 
@@ -92,7 +92,7 @@ export default function AdminDashboard({ initialImages }: AdminDashboardProps) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState<Pledge | Submission | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Pledge | Submission | AuditLog | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; type: 'pledge' | 'submission'; name: string } | null>(null);
   
@@ -401,7 +401,7 @@ export default function AdminDashboard({ initialImages }: AdminDashboardProps) {
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {auditLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => { setSelectedItem(log as any); setIsModalOpen(true); }}>
+                      <tr key={log.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => { setSelectedItem(log as Pledge | Submission | AuditLog); setIsModalOpen(true); }}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{log.action}</td>
                         <td className="px-6 py-4 text-sm">{log.targetKind} ({log.targetId.slice(0, 8)}...)</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{log.actorEmail || 'System'}</td>

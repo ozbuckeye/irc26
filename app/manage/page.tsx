@@ -34,7 +34,7 @@ function ManageContent() {
   const token = searchParams.get('token');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ email: string; gcUsername?: string } | null>(null);
   const [pledges, setPledges] = useState<Pledge[]>([]);
   const [confirmations, setConfirmations] = useState<Confirmation[]>([]);
   const [editingPledge, setEditingPledge] = useState<string | null>(null);
@@ -63,8 +63,8 @@ function ManageContent() {
       setPledges(data.pledges);
       setConfirmations(data.confirmations);
       setLoading(false);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);
     }
   };
@@ -89,8 +89,8 @@ function ManageContent() {
       }
 
       alert('Magic link sent! Check your email.');
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setRequestingLink(false);
     }
@@ -109,8 +109,8 @@ function ManageContent() {
       }
 
       setPledges(pledges.filter((p) => p.id !== id));
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
@@ -127,8 +127,8 @@ function ManageContent() {
       }
 
       setConfirmations(confirmations.filter((c) => c.id !== id));
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
@@ -188,7 +188,7 @@ function ManageContent() {
         Manage Your IRC26 Entries
       </h1>
       <p className="text-center text-gray-600 mb-8">
-        Welcome, {user?.username}! Manage your pledges and confirmed caches below.
+        Welcome, {user?.gcUsername}! Manage your pledges and confirmed caches below.
       </p>
 
       {/* Pledges Section */}
@@ -365,8 +365,8 @@ function EditPledgeForm({ pledge, token, onSave, onCancel }: { pledge: Pledge; t
       }
 
       onSave();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setSaving(false);
     }
@@ -515,8 +515,8 @@ function EditConfirmationForm({ confirmation, token, onSave, onCancel }: { confi
       }
 
       onSave();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setSaving(false);
     }

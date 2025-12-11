@@ -13,7 +13,7 @@ type Pledge = {
   cacheType: string;
   approxSuburb: string;
   approxState: string;
-  submission: any | null;
+  submission: { id: string } | null;
 };
 
 export default function ConfirmPage() {
@@ -61,12 +61,12 @@ export default function ConfirmPage() {
         setFormData({
           ...formData,
           suburb: pledge.approxSuburb,
-          state: pledge.approxState as any,
-          type: pledge.cacheType as any,
+          state: pledge.approxState as 'ACT' | 'NSW' | 'NT' | 'QLD' | 'SA' | 'TAS' | 'VIC' | 'WA',
+          type: pledge.cacheType as 'TRADITIONAL' | 'MULTI' | 'MYSTERY' | 'LETTERBOX' | 'WHERIGO' | 'VIRTUAL',
         });
       }
     }
-  }, [selectedPledgeId]);
+  }, [selectedPledgeId, pledges, formData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,8 +103,8 @@ export default function ConfirmPage() {
       }
 
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);
     }
   };
@@ -252,7 +252,7 @@ export default function ConfirmPage() {
                 id="type"
                 required
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value as 'TRADITIONAL' | 'MULTI' | 'MYSTERY' | 'LETTERBOX' | 'WHERIGO' | 'VIRTUAL' })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500"
               >
                 <option value="">Select type</option>
@@ -342,7 +342,7 @@ export default function ConfirmPage() {
                 id="state"
                 required
                 value={formData.state}
-                onChange={(e) => setFormData({ ...formData, state: e.target.value as any })}
+                onChange={(e) => setFormData({ ...formData, state: e.target.value as 'ACT' | 'NSW' | 'NT' | 'QLD' | 'SA' | 'TAS' | 'VIC' | 'WA' })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500"
               >
                 <option value="">Select state</option>

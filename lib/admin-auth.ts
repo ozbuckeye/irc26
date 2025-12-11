@@ -24,7 +24,7 @@ export async function verifyAdminSession(): Promise<{ email: string; role: strin
       email: payload.email as string,
       role: payload.role as string,
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 }

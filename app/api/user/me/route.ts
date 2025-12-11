@@ -22,9 +22,10 @@ export async function GET() {
     }
 
     return NextResponse.json({ user });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching user:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch user' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to fetch user';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -49,11 +50,12 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json({ user });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating user:', error);
-    if (error.name === 'ZodError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError' && 'errors' in error) {
       return NextResponse.json({ error: 'Validation error', details: error.errors }, { status: 400 });
     }
-    return NextResponse.json({ error: error.message || 'Failed to update user' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to update user';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

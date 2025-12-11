@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { updateSubmissionSchema } from '@/lib/validation';
 import { isAdmin } from '@/lib/auth-config';
+import { Prisma } from '@prisma/client';
 
 export async function GET(
   request: NextRequest,
@@ -27,9 +28,10 @@ export async function GET(
     }
 
     return NextResponse.json({ submission });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching submission:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch submission' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to fetch submission';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -61,7 +63,7 @@ export async function PATCH(
     const validated = updateSubmissionSchema.parse(body);
 
     // Parse hiddenDate if provided
-    const updateData: any = { ...validated };
+    const updateData: Prisma.SubmissionUpdateInput = { ...validated };
     if (validated.hiddenDate) {
       updateData.hiddenDate = typeof validated.hiddenDate === 'string' 
         ? new Date(validated.hiddenDate) 
@@ -83,19 +85,20 @@ export async function PATCH(
           action: 'UPDATE_SUBMISSION',
           targetId: submissionId,
           targetKind: 'SUBMISSION',
-          before: existingSubmission as any,
-          after: submission as any,
+          before: existingSubmission as unknown as Prisma.InputJsonValue,
+          after: submission as unknown as Prisma.InputJsonValue,
         },
       });
     }
 
     return NextResponse.json({ success: true, submission });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating submission:', error);
-    if (error.name === 'ZodError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError' && 'errors' in error) {
       return NextResponse.json({ error: 'Validation error', details: error.errors }, { status: 400 });
     }
-    return NextResponse.json({ error: error.message || 'Failed to update submission' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to update submission';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -131,7 +134,7 @@ export async function DELETE(
           action: 'DELETE_SUBMISSION',
           targetId: submissionId,
           targetKind: 'SUBMISSION',
-          before: existingSubmission as any,
+          before: existingSubmission as unknown as Prisma.InputJsonValue,
         },
       });
     }
@@ -148,8 +151,9 @@ export async function DELETE(
     ]);
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting submission:', error);
-    return NextResponse.json({ error: error.message || 'Failed to delete submission' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to delete submission';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

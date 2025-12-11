@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { submissionSchema } from '@/lib/validation';
 import { sendSubmissionConfirmationEmail } from '@/lib/email';
+import { Prisma } from '@prisma/client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,20 +39,20 @@ export async function POST(request: NextRequest) {
       : validated.hiddenDate;
 
     // Move images from pledge to submission (transfer, not copy)
-    let submissionImages = null;
+    let submissionImages: Prisma.InputJsonValue | undefined = undefined;
     if (pledge.images) {
       // Handle various image formats (same logic as used elsewhere)
       if (Array.isArray(pledge.images)) {
-        submissionImages = pledge.images;
+        submissionImages = pledge.images as Prisma.InputJsonValue;
       } else if (typeof pledge.images === 'string') {
         try {
           const parsed = JSON.parse(pledge.images);
-          submissionImages = Array.isArray(parsed) ? parsed : null;
+          submissionImages = Array.isArray(parsed) ? (parsed as Prisma.InputJsonValue) : undefined;
         } catch {
-          submissionImages = null;
+          submissionImages = undefined;
         }
       } else if (typeof pledge.images === 'object') {
-        submissionImages = pledge.images;
+        submissionImages = pledge.images as Prisma.InputJsonValue;
       }
     }
 
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
         where: { id: validated.pledgeId },
         data: { 
           status: 'HIDDEN',
-          images: null, // Clear images from pledge since they're now in submission
+          images: Prisma.DbNull, // Clear images from pledge since they're now in submission
         },
       });
 
@@ -97,12 +98,13 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, submission }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating submission:', error);
-    if (error.name === 'ZodError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError' && 'errors' in error) {
       return NextResponse.json({ error: 'Validation error', details: error.errors }, { status: 400 });
     }
-    return NextResponse.json({ error: error.message || 'Failed to create submission' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to create submission';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

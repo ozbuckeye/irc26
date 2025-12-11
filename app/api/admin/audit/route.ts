@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminSession } from '@/lib/admin-session';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    const where: any = {};
+    const where: Prisma.AuditLogWhereInput = {};
 
     if (action) {
       where.action = action;
@@ -48,9 +49,10 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ auditLogs });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching audit logs:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch audit logs' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to fetch audit logs';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

@@ -19,7 +19,7 @@ export default function PublishingSchedule() {
         </h2>
 
         <p className="text-center text-[14px] leading-6 mb-4">
-          We need as many CO's around Australia to hide<br />
+          We need as many CO&apos;s around Australia to hide<br />
           fp worthy caches!
         </p>
 

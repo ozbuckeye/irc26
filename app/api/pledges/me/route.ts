@@ -15,9 +15,10 @@ export async function GET() {
     });
 
     return NextResponse.json({ pledges });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching pledges:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch pledges' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to fetch pledges';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

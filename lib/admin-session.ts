@@ -17,7 +17,7 @@ export async function verifyAdminSession(): Promise<boolean> {
     const { payload } = await jwtVerify(token, secret);
     
     return payload.admin === true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

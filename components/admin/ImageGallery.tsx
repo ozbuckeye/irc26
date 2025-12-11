@@ -29,7 +29,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
         <h2 className="text-2xl font-semibold mb-4 font-lovely">Image Gallery</h2>
         <div className="bg-white rounded-lg shadow p-8 text-center">
           <p className="text-sm text-gray-500">
-            No images have been uploaded yet. Once Rainmakers start adding photos to pledges and submissions, they'll appear here.
+            No images have been uploaded yet. Once Rainmakers start adding photos to pledges and submissions, they&apos;ll appear here.
           </p>
         </div>
       </section>

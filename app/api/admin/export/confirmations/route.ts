@@ -13,18 +13,18 @@ export async function GET() {
       );
     }
 
-    const confirmations = await prisma.confirmation.findMany({
+    const confirmations = await prisma.submission.findMany({
       include: {
         user: {
           select: {
-            username: true,
+            gcUsername: true,
             email: true,
           },
         },
         pledge: {
           select: {
             id: true,
-            pledgedCount: true,
+            title: true,
           },
         },
       },
@@ -34,20 +34,18 @@ export async function GET() {
     });
 
     // Convert to CSV
-    const headers = ['Username', 'Email', 'GC Code', 'Cache Name', 'Type', 'Size', 'Difficulty', 'Terrain', 'Suburb', 'State', 'Notes', 'From Non-Pledge', 'Pledge ID', 'Created At'];
+    const headers = ['Username', 'Email', 'GC Code', 'Cache Name', 'Type', 'Difficulty', 'Terrain', 'Suburb', 'State', 'Notes', 'Pledge ID', 'Created At'];
     const rows = confirmations.map((c) => [
-      c.user?.username || '',
+      c.user?.gcUsername || '',
       c.user?.email || '',
       c.gcCode,
       c.cacheName,
       c.type,
-      c.size,
       c.difficulty.toString(),
       c.terrain.toString(),
       c.suburb,
       c.state,
       c.notes || '',
-      c.fromNonPledge ? 'Yes' : 'No',
       c.pledgeId || '',
       c.createdAt.toISOString(),
     ]);
@@ -63,8 +61,8 @@ export async function GET() {
         'Content-Disposition': 'attachment; filename="irc26-confirmations.csv"',
       },
     });
-  } catch (error: any) {
-    if (error.message === 'Unauthorized') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

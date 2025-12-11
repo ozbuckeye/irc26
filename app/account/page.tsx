@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { signOut } from 'next-auth/react';
 import RequireAuth from '@/components/RequireAuth';
 import Card from '@/components/Card';
@@ -16,7 +15,11 @@ type Pledge = {
   approxState: string;
   status: string;
   createdAt: string;
-  submission: any | null;
+  submission: {
+    id: string;
+    gcCode: string;
+    cacheName: string;
+  } | null;
 };
 
 type Submission = {
@@ -38,7 +41,6 @@ type User = {
 };
 
 export default function AccountPage() {
-  const { data: session } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const [pledges, setPledges] = useState<Pledge[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -79,7 +81,7 @@ export default function AccountPage() {
         const data = await response.json();
         setUser(data.user);
       }
-    } catch (error) {
+    } catch {
       console.error('Failed to update username');
     } finally {
       setUpdatingUsername(false);

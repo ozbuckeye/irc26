@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { updatePledgeSchema } from '@/lib/validation';
 import { isAdmin } from '@/lib/auth-config';
+import { Prisma } from '@prisma/client';
 
 export async function GET(
   request: NextRequest,
@@ -27,9 +28,10 @@ export async function GET(
     }
 
     return NextResponse.json({ pledge });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching pledge:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch pledge' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to fetch pledge';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -61,7 +63,7 @@ export async function PATCH(
     const validated = updatePledgeSchema.parse(body);
 
     // Prepare update data
-    const updateData: any = {
+    const updateData: Prisma.PledgeUpdateInput = {
       ...validated,
       gcUsername: validated.gcUsername || existingPledge.gcUsername,
     };
@@ -86,19 +88,20 @@ export async function PATCH(
           action: 'UPDATE_PLEDGE',
           targetId: pledgeId,
           targetKind: 'PLEDGE',
-          before: existingPledge as any,
-          after: pledge as any,
+          before: existingPledge as unknown as Prisma.InputJsonValue,
+          after: pledge as unknown as Prisma.InputJsonValue,
         },
       });
     }
 
     return NextResponse.json({ success: true, pledge });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating pledge:', error);
-    if (error.name === 'ZodError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError' && 'errors' in error) {
       return NextResponse.json({ error: 'Validation error', details: error.errors }, { status: 400 });
     }
-    return NextResponse.json({ error: error.message || 'Failed to update pledge' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to update pledge';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -134,7 +137,7 @@ export async function DELETE(
           action: 'DELETE_PLEDGE',
           targetId: pledgeId,
           targetKind: 'PLEDGE',
-          before: existingPledge as any,
+          before: existingPledge as unknown as Prisma.InputJsonValue,
         },
       });
     }
@@ -145,8 +148,9 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting pledge:', error);
-    return NextResponse.json({ error: error.message || 'Failed to delete pledge' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to delete pledge';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

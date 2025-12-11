@@ -101,16 +101,16 @@ export default function EditSubmissionPage() {
       }
 
       router.push('/account');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       setSaving(false);
     }
   };
 
-  const handleImageUpload = (res: any) => {
+  const handleImageUpload = (res: { url: string; key: string; width?: number; height?: number }[]) => {
     setUploadingImage(false); // Image has appeared
     if (res && Array.isArray(res)) {
-      const newImages = res.map((file: any) => ({
+      const newImages = res.map((file) => ({
         url: file.url,
         key: file.key,
         width: file.width,
@@ -216,7 +216,7 @@ export default function EditSubmissionPage() {
                       id="type"
                       required
                       value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value as 'TRADITIONAL' | 'MULTI' | 'MYSTERY' | 'LETTERBOX' | 'WHERIGO' | 'VIRTUAL' })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500"
                     >
                       <option value="">Select type</option>
@@ -306,7 +306,7 @@ export default function EditSubmissionPage() {
                       id="state"
                       required
                       value={formData.state}
-                      onChange={(e) => setFormData({ ...formData, state: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, state: e.target.value as 'ACT' | 'NSW' | 'NT' | 'QLD' | 'SA' | 'TAS' | 'VIC' | 'WA' })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500"
                     >
                       <option value="">Select state</option>

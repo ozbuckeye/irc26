@@ -124,7 +124,7 @@ export default function FAQs() {
                     </h2>
 
                     <p className="text-center text-[16px] leading-6 mb-4">
-                      We need as many CO's around Australia to hide<br />
+                      We need as many CO&apos;s around Australia to hide<br />
                       fp worthy caches!
                     </p>
 
@@ -185,7 +185,7 @@ export default function FAQs() {
               {/* Second Q/A */}
               <div>
                 <h2 className="font-lovely text-xl sm:text-2xl leading-tight tracking-wide mt-6 mb-2 text-center">
-                  WHAT'S AN 'FP (Favourite Point) WORTHY' HIDE?
+                  WHAT&apos;S AN &apos;FP (Favourite Point) WORTHY&apos; HIDE?
                 </h2>
                 <p className="leading-relaxed mt-1 text-center">A geocache that is creative, clever and had effort put into
 its hide. What makes you give an FP? Create your hides to

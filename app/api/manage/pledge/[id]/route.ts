@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { validateEditToken, deleteEditToken } from '@/lib/auth';
+import { validateEditToken } from '@/lib/auth';
 import { editPledgeSchema } from '@/lib/validation';
 
 export async function PUT(
@@ -61,8 +61,8 @@ export async function PUT(
       success: true,
       pledge: updated,
     });
-  } catch (error: any) {
-    if (error.name === 'ZodError') {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError' && 'errors' in error) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
         { status: 400 }
