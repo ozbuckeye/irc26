@@ -3,6 +3,8 @@ import { verifyAdminSession } from '@/lib/admin-session';
 import { getAllAdminImages } from '@/lib/admin-images';
 import AdminDashboard from '@/components/AdminDashboard';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminPage() {
   const isAdmin = await verifyAdminSession();
 
