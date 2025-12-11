@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdminSession } from '@/lib/admin-session';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const isAdmin = await verifyAdminSession();

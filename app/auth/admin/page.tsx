@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Card from '@/components/Card';
 
-export default function AdminSignInPage() {
+function AdminSignInContent() {
   useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/admin';
@@ -79,6 +79,14 @@ export default function AdminSignInPage() {
         </Card>
       </div>
     </main>
+  );
+}
+
+export default function AdminSignInPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <AdminSignInContent />
+    </Suspense>
   );
 }
 

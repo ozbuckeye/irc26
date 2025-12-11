@@ -3,6 +3,8 @@ import { requireAuth } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { gcUsernameSchema } from '@/lib/validation';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const session = await requireAuth();
