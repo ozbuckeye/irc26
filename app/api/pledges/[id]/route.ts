@@ -5,6 +5,8 @@ import { updatePledgeSchema } from '@/lib/validation';
 import { isAdmin } from '@/lib/auth-config';
 import { Prisma } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }

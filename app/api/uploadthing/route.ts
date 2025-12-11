@@ -2,6 +2,8 @@ import { createRouteHandler } from 'uploadthing/next';
 import { ourFileRouter } from './core';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 // UploadThing v7 supports both patterns:
 // 1. New: UPLOADTHING_TOKEN (single token, recommended for v7)
 // 2. Legacy: UPLOADTHING_SECRET + UPLOADTHING_APP_ID (still supported)

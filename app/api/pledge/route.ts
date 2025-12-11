@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 // This endpoint is deprecated - pledges are now created via /api/pledges with authentication
 export async function POST(request: NextRequest) {
   try {

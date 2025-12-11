@@ -4,6 +4,8 @@ import { emailSchema } from '@/lib/validation';
 import { createEditToken } from '@/lib/auth';
 import { sendMagicLink } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

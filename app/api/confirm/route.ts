@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 // This endpoint is deprecated - submissions are now created via /api/submissions
 export async function POST(request: NextRequest) {
   try {

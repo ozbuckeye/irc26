@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { pledgeSchema } from '@/lib/validation';
 import { sendPledgeConfirmationEmail } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth();

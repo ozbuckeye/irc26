@@ -5,6 +5,8 @@ import { submissionSchema } from '@/lib/validation';
 import { sendSubmissionConfirmationEmail } from '@/lib/email';
 import { Prisma } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth();
